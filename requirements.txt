@@ -7,6 +7,11 @@ pytz==2023.3.post1
 sqlparse==0.4.4
 typing_extensions==4.9.0
 face_recognition
-transformers
+transformers~=4.36.2
 accelerate
-torch
+torch~=2.1.2
+einops
+bitsandbytes
+sentence_transformers
+peft
+numba
