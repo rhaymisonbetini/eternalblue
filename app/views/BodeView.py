@@ -10,5 +10,6 @@ class BodeView(APIView):
 
     def post(self, request):
         question = request.data.get('question')
-        bode = self.bodeService.ask(question)
+        input = request.data.get('input')
+        bode = self.bodeService.ask(question, input)
         return Response({"response": bode})

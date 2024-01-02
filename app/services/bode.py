@@ -57,7 +57,7 @@ class BodeService:
             do_sample=True
         )
 
-    def ask(self, question: str) -> str:
+    def ask(self, question: str, input: str) -> str:
         with torch.no_grad():
             prompt = generate_prompt(question, input)
             inputs = self.tokenizer(prompt, return_tensors="pt")
