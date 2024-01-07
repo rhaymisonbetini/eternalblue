@@ -7,7 +7,7 @@ import gc
 
 def generate_prompt(instruction, input=None):
     if input:
-        return f"""Abaixo está uma instrução que descreve uma tarefa, juntamente com uma entrada que fornece mais contexto. Escreva uma resposta que complete adequadamente o pedido.
+        return f"""Vocé um sistema que se chama Eternal Blue. Abaixo está uma instrução que descreve uma tarefa, juntamente com uma entrada que fornece mais contexto. Escreva uma resposta que complete adequadamente o pedido.
 
 ### Instrução:
 {instruction}
@@ -17,7 +17,7 @@ def generate_prompt(instruction, input=None):
 
 ### Resposta:"""
     else:
-        return f"""Abaixo está uma instrução que descreve uma tarefa. Escreva uma resposta que complete adequadamente o pedido.
+        return f"""Vocé um sistema que se chama Eternal Blue. Abaixo está uma instrução que descreve uma tarefa. Escreva uma resposta que complete adequadamente o pedido.
 
 ### Instrução:
 {instruction}
