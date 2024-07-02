@@ -1,7 +1,7 @@
 from src.EternalBlue import EternalBlue
 
 def test_eternalblue():
-    hg_token = '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'
+    hg_token = ''
     language = 'portuguese'
     audio_path = '/home/deathpirate/Downloads/tester.wav'
 
