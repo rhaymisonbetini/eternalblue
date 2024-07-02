@@ -3,7 +3,7 @@ import json
 import os
 from transformers import AutoModelForSpeechSeq2Seq, pipeline, AutoProcessor
 from pydub import AudioSegment
-from src.utils import TRANSCRIPTION_PATH, OUTPUT_PATH, AUDIOS_PATH
+from eternalblue.utils import TRANSCRIPTION_PATH, OUTPUT_PATH, AUDIOS_PATH
 
 
 def round_times(segments):
@@ -29,10 +29,10 @@ def read_rttm(file_path):
 
 
 class Transcription:
-    def __init__(self):
+    def __init__(self, model: str):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-        self.model_id = "openai/whisper-large-v3"
+        self.model_id = model
 
     def generate_transcription(self, audio_path: str, audio_name: str, language: str) -> str:
         rttm_file_path = OUTPUT_PATH + f"/{audio_name}"

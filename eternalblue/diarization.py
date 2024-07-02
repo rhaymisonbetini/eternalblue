@@ -3,8 +3,8 @@ import torchaudio
 import uuid
 from pyannote.audio import Pipeline
 from pyannote.audio.pipelines.utils.hook import ProgressHook
-from src.Conversor import Conversor
-from src.utils import OUTPUT_PATH
+from eternalblue.conversor import Conversor
+from eternalblue.utils import OUTPUT_PATH
 
 
 class Diarization:

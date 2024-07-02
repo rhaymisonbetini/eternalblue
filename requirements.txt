@@ -1,8 +1,0 @@
-setuptools~=70.0.0
-torch~=2.3.1
-torchaudio~=2.3.1
-pyannote.audio
-noisereduce~=3.0.2
-librosa~=0.10.2.post1
-soundfile~=0.12.1
-pydub~=0.25.1

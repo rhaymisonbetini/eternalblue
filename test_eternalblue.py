@@ -1,4 +1,8 @@
-from src.EternalBlue import EternalBlue
+from eternalblue.eternalBlue import EternalBlue
+import warnings
+
+warnings.filterwarnings('ignore')
+
 
 def test_eternalblue():
     hg_token = ''
