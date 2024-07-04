@@ -15,4 +15,4 @@ def test_eternalblue():
 
 if __name__ == '__main__':
     test_eternalblue()
-
+    # EternalBlue.clear_cache()

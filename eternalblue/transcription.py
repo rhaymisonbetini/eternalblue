@@ -1,7 +1,9 @@
 import torch
 import json
 import os
-from transformers import AutoModelForSpeechSeq2Seq, pipeline, AutoProcessor
+from transformers import pipeline
+from transformers import WhisperForConditionalGeneration
+from transformers import WhisperProcessor
 from pydub import AudioSegment
 from eternalblue.utils import TRANSCRIPTION_PATH, OUTPUT_PATH, AUDIOS_PATH
 
@@ -29,10 +31,25 @@ def read_rttm(file_path):
 
 
 class Transcription:
-    def __init__(self, model: str):
+    def __init__(self, model: str, language: str):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
         self.model_id = model
+        self.model = WhisperForConditionalGeneration.from_pretrained(
+            self.model_id, torch_dtype=self.torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+        )
+        self.model.to(self.device)
+        processor = WhisperProcessor.from_pretrained(self.model_id, language=language, task="transcribe")
+        self.pipe = pipeline(
+            "automatic-speech-recognition",
+            model=self.model,
+            tokenizer=processor.tokenizer,
+            feature_extractor=processor.feature_extractor,
+            max_new_tokens=128,
+            batch_size=16,
+            torch_dtype=self.torch_dtype,
+            device=self.device,
+        )
 
     def generate_transcription(self, audio_path: str, audio_name: str, language: str) -> str:
         rttm_file_path = OUTPUT_PATH + f"/{audio_name}"
@@ -40,26 +57,8 @@ class Transcription:
         rounded_segments = round_times(segments)
         audio = AudioSegment.from_file(audio_path)
 
-        model = AutoModelForSpeechSeq2Seq.from_pretrained(
-            self.model_id, torch_dtype=self.torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
-        )
-
-        model.to(self.device)
-        processor = AutoProcessor.from_pretrained(self.model_id)
         name = audio_path.split("/")[-1]
         transcriptions_array = [{"metadata": [{"audioname": name, "time_type": "seconds"}]}]
-
-        pipe = pipeline(
-            "automatic-speech-recognition",
-            model=model,
-            tokenizer=processor.tokenizer,
-            feature_extractor=processor.feature_extractor,
-            max_new_tokens=128,
-            batch_size=16,
-            return_timestamps=True,
-            torch_dtype=self.torch_dtype,
-            device=self.device,
-        )
 
         for i, segment in enumerate(rounded_segments):
             speaker_id, start, end = segment
@@ -69,10 +68,10 @@ class Transcription:
                 output_path = os.path.join(AUDIOS_PATH, audio_name)
                 segment_audio.export(output_path, format="wav")
 
-                transcription = pipe(output_path,
-                                     chunk_length_s=int(end - start) + 0.5,
-                                     generate_kwargs={"language": language, "task": "transcribe"},
-                                     )
+                transcription = self.pipe(output_path,
+                                          chunk_length_s=int(end - start) + 0.5,
+                                          generate_kwargs={"language": language, "task": "transcribe"},
+                                          )
 
                 transcriptions_array.append({
                     "start": float(start),

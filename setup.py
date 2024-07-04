@@ -6,7 +6,7 @@ long_description = (this_directory / "README.rst").read_text()
 
 setup(
     name='eternalblue',
-    version='1.2.1',
+    version='1.3.1',
     description='A diarization package',
     long_description=long_description,
     long_description_content_type='text/x-rst',

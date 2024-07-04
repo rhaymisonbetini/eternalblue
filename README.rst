@@ -59,6 +59,14 @@ Here's an example of how to use the `EternalBlue` class in a Flask application:
             print(f"Error: {e}")
             return str(e), 500
 
+
+For empty trash in failed jobs
+
+.. code-block:: python
+
+    from eternalblue import EternalBlue
+    EternalBlue.clear_cache()
+
 Description
 -----------
 

@@ -1,11 +1,14 @@
 import os
 import json
-from pydub import AudioSegment
+import torchaudio
+import torchaudio.transforms as T
 from eternalblue.diarization import Diarization
 from eternalblue.transcription import Transcription
-from eternalblue.utils import OUTPUT_PATH, AUDIOS_PATH
+from eternalblue.utils import OUTPUT_PATH, AUDIOS_PATH, TRANSCRIPTION_PATH
 import warnings
+
 warnings.filterwarnings("ignore")
+
 
 def create_directories():
     base_dir = os.path.join(os.path.dirname(__file__), 'public')
@@ -30,22 +33,41 @@ class EternalBlue:
     def diarize(self, audio_path: str, num_speakers=2):
 
         if not audio_path.endswith('.wav'):
-            raise ValueError("Apenas arquivos .wav são aceitos")
+            raise ValueError("Only .wav files are accepted")
 
         diarizer = Diarization(self.hg_token)
-        audio = AudioSegment.from_wav(audio_path)
-        audio = audio.set_frame_rate(16000)
+
+        waveform, sample_rate = torchaudio.load(audio_path)
+
+        if waveform.shape[0] > 1:
+            waveform = waveform.mean(dim=0)
+
+        resampler = T.Resample(orig_freq=sample_rate, new_freq=16000)
+        waveform = resampler(waveform)
+        waveform = waveform.squeeze()
+
         base_name = os.path.basename(audio_path)
         new_audio_path = os.path.join(AUDIOS_PATH, f"converted_{base_name}")
-        audio.export(new_audio_path, format="wav")
+
+        torchaudio.save(new_audio_path, waveform.unsqueeze(0), 16000)
+
         audio_name = diarizer.diarize(new_audio_path, num_speakers)
 
         if audio_name is not None:
-            transcriptor = Transcription(self.model)
-            output_json = transcriptor.generate_transcription(audio_path, audio_name, self.language)
+            transcriptor = Transcription(self.model, self.language)
+            output_json = transcriptor.generate_transcription(new_audio_path, audio_name, self.language)
             with open(output_json, 'r', encoding='utf-8') as arquivo:
                 pure_json = json.load(arquivo)
             os.remove(output_json)
             os.remove(OUTPUT_PATH + f"/{audio_name}")
             os.remove(new_audio_path)
             return pure_json
+
+    @staticmethod
+    def clear_cache():
+        paths = [OUTPUT_PATH, AUDIOS_PATH, TRANSCRIPTION_PATH]
+        for path in paths:
+            for file in os.listdir(path):
+                file_path = os.path.join(path, file)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
